@@ -1,0 +1,7 @@
+#Visual Studio files
+.vs/
+**.sln
+**.pyproj
+
+#Python files
+__pycache__/
