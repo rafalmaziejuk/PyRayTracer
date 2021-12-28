@@ -21,6 +21,7 @@ class Window():
             sys.exit("Couldn't create window.")
 
         glfwMakeContextCurrent(self.window_handle)
+        glfwSwapInterval(1)
 
     def cleanup(self):
         glfwDestroyWindow(self.window_handle)
@@ -36,3 +37,6 @@ class Window():
     def process_input(self):
         if glfwGetKey(self.window_handle, GLFW_KEY_ESCAPE) == GLFW_PRESS:
             glfwSetWindowShouldClose(self.window_handle, True)
+
+    def get_time(self):
+        return glfwGetTime()
