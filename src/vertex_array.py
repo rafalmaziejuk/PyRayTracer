@@ -9,7 +9,8 @@ class VertexArray():
 
 	def cleanup(self):
 		self.vertexBuffer.cleanup()
-		self.elementBuffer.cleanup()
+		if self.elementBuffer:
+			self.elementBuffer.cleanup()
 		glDeleteVertexArrays(1, [self.id])
 
 	def bind(self):
