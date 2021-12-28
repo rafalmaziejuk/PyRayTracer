@@ -28,7 +28,6 @@ class Texture():
 
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, self.width, self.height, 0, dataFormat, GL_UNSIGNED_BYTE, image.tobytes())
 		glGenerateMipmap(GL_TEXTURE_2D)
-		glBindTexture(GL_TEXTURE_2D, 0)
 
 	def cleanup(self):
 		glDeleteTextures(1, [self.id])

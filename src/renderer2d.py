@@ -8,13 +8,14 @@ class RendererData():
     def __init__(self, width, height):
         self.projectionMatrix = ortho(0.0, width, height, 0.0, -1.0, 1.0)
 
-        self.shaderSolid = Shader('shaders/shaderSolid.vert', 'shaders/shaderSolid.frag')
+        self.shaderSolid = Shader('shaders/shaderSolid2D.vert', 'shaders/shaderSolid2D.frag')
         self.shaderSolid.bind()
         self.shaderSolid.set_mat4('projection', value_ptr(self.projectionMatrix))
 
-        self.shaderTexture = Shader('shaders/shaderTexture.vert', 'shaders/shaderTexture.frag')
+        self.shaderTexture = Shader('shaders/shaderTexture2D.vert', 'shaders/shaderTexture2D.frag')
         self.shaderTexture.bind()
         self.shaderTexture.set_mat4('projection', value_ptr(self.projectionMatrix))
+        self.shaderTexture.set_int('texture0', 0)
 		
         vertices = [
             -0.5, -0.5, 0.0, 0.0,
@@ -42,7 +43,7 @@ class RendererData():
 
 rendererData = None
 
-class Renderer():
+class Renderer2D():
     @staticmethod
     def init(width, height, clearColor):
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
