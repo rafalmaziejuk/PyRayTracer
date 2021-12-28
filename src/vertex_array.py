@@ -31,7 +31,7 @@ class VertexArray():
 				stride,
 				c_void_p(element.offset))
 
-		self.vertexBuffer = vertexBuffer;
+		self.vertexBuffer = vertexBuffer
 
 	def set_element_buffer(self, elementBuffer):
 		self.bind()

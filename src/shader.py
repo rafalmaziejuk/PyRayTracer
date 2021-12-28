@@ -9,12 +9,10 @@ def read_file(filepath):
 class Shader():
 	def __init__(self, vert, frag):
 		self.id = glCreateProgram()
-		vertexShaderSource = read_file(vert)
-		fragmentShaderSource = read_file(frag)
 
 		shaderSources = {
-			GL_VERTEX_SHADER:   vertexShaderSource,
-			GL_FRAGMENT_SHADER: fragmentShaderSource
+			GL_VERTEX_SHADER:   read_file(vert),
+			GL_FRAGMENT_SHADER: read_file(frag)
 			}
 
 		self.__compile(shaderSources)
@@ -42,12 +40,12 @@ class Shader():
 		glUseProgram(self.id)
 
 	def set_int(self, name, value):
-		location = glGetUniformLocation(self.id, name);
-		glUniform1i(location, value);
+		location = glGetUniformLocation(self.id, name)
+		glUniform1i(location, value)
 	
 	def set_float(self, name, value):
-		location = glGetUniformLocation(self.id, name);
-		glUniform1f(location, value);
+		location = glGetUniformLocation(self.id, name)
+		glUniform1f(location, value)
 	
 	def set_vec3f(self, name, vec):
 		location = glGetUniformLocation(self.id, name)

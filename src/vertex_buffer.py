@@ -37,7 +37,7 @@ class BufferLayout():
 		self.calculate_stride()
 
 	def calculate_stride(self):
-		offset = 0;
+		offset = 0
 		for element in self.vbElements:
 			element.offset = offset
 			self.stride += element.size
@@ -63,7 +63,7 @@ class ElementBuffer():
 	def __init__(self, data):
 		self.elementCount = len(data)
 		self.id = glGenBuffers(1)
-		glBindBuffer(GL_ARRAY_BUFFER, self.id);
+		glBindBuffer(GL_ARRAY_BUFFER, self.id)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(c_uint32) * self.elementCount, (c_uint32 * len(data))(*data), GL_STATIC_DRAW)
 
 	def cleanup(self):
