@@ -2,15 +2,19 @@ from vertex_array import VertexArray
 from vertex_buffer import VertexBuffer, ElementBuffer, BufferLayout, Types
 from shader import Shader
 from OpenGL.GL import *
-from glm import value_ptr, ortho, translate, scale, mat4, vec3
+from glm import value_ptr, ortho, translate, rotate, radians, scale, mat4, vec3
 
 class RendererData():
     def __init__(self, width, height):
         self.projectionMatrix = ortho(0.0, width, height, 0.0, -1.0, 1.0)
-        self.shader = Shader('shaders/shader.vert', 'shaders/shader.frag')
 
-        self.shader.bind()
-        self.shader.set_mat4('projection', value_ptr(self.projectionMatrix))
+        self.shaderSolid = Shader('shaders/shaderSolid.vert', 'shaders/shaderSolid.frag')
+        self.shaderSolid.bind()
+        self.shaderSolid.set_mat4('projection', value_ptr(self.projectionMatrix))
+
+        self.shaderTexture = Shader('shaders/shaderTexture.vert', 'shaders/shaderTexture.frag')
+        self.shaderTexture.bind()
+        self.shaderTexture.set_mat4('projection', value_ptr(self.projectionMatrix))
 		
         vertices = [
             -0.5, -0.5, 0.0, 0.0,
@@ -32,7 +36,8 @@ class RendererData():
         self.vertexArray.set_element_buffer(elementBuffer)
 
     def cleanup(self):
-        self.shader.cleanup()
+        self.shaderSolid.cleanup()
+        self.shaderTexture.cleanup()
         self.vertexArray.cleanup()
 
 rendererData = None
@@ -55,12 +60,29 @@ class Renderer():
         glClear(GL_COLOR_BUFFER_BIT)
 
     @staticmethod
-    def draw(position, size, color):
-        model = translate(mat4(1.0), vec3(position, 0.0)) * scale(mat4(1.0), vec3(size, 1.0))
+    def drawSolid(position, size, color, rotation=0.0):
+        model = translate(mat4(1.0), vec3(position, 0.0)) * \
+		        rotate(mat4(1.0), radians(rotation), vec3(0.0, 0.0, 1.0)) * \
+		        scale(mat4(1.0), vec3(size, 1.0))
 
-        rendererData.shader.bind()
-        rendererData.shader.set_vec3f('color', vec3(color))
-        rendererData.shader.set_mat4('model', value_ptr(model))
+        rendererData.shaderSolid.bind()
+        rendererData.shaderSolid.set_vec3f('color', vec3(color))
+        rendererData.shaderSolid.set_mat4('model', value_ptr(model))
 
         rendererData.vertexArray.bind()
         glDrawElements(GL_TRIANGLES, rendererData.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
+
+    @staticmethod
+    def drawTexture(position, texture, rotation=0.0):
+        model = translate(mat4(1.0), vec3(position, 0.0)) * \
+		        rotate(mat4(1.0), radians(rotation), vec3(0.0, 0.0, 1.0)) * \
+		        scale(mat4(1.0), vec3(texture.size, 1.0))
+        
+        rendererData.shaderTexture.bind()
+        rendererData.shaderTexture.set_mat4('model', value_ptr(model))
+        
+        texture.bind(GL_TEXTURE0)
+        
+        rendererData.vertexArray.bind()
+        glDrawElements(GL_TRIANGLES, rendererData.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
+        texture.unbind()
