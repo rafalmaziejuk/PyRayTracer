@@ -1,6 +1,6 @@
-from vertex_array import VertexArray
-from vertex_buffer import VertexBuffer, ElementBuffer, BufferLayout, Types
-from shader import Shader
+from graphics.vertex_array import VertexArray
+from graphics.vertex_buffer import VertexBuffer, ElementBuffer, BufferLayout, Types
+from graphics.shader import Shader
 from OpenGL.GL import *
 from glm import value_ptr, perspective, translate, rotate, radians, scale, mat4, vec3
 

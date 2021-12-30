@@ -2,6 +2,7 @@
 .vs/
 **.sln
 **.pyproj
+**.pyproj.user
 
 #Python files
 __pycache__/

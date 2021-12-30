@@ -1,6 +1,6 @@
 from window import Window
-from renderer3d import Renderer3D
-from texture import Texture
+from graphics.renderer3d import Renderer3D
+from graphics.texture import Texture
 
 class Application():
     def __init__(self, width=800, height=600, name='PyRayTracer'):
