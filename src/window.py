@@ -1,42 +1,86 @@
+from events.keyboard_events import KeyPressedEvent, KeyReleasedEvent
+from events.mouse_events import MouseMovedEvent, MouseButtonPressedEvent, MouseButtonReleasedEvent
+from events.window_events import WindowCloseEvent, WindowResizeEvent
 from glfw.GLFW import *
-
 import sys
 
+def window_close_callback(windowHandle):
+	data = glfwGetWindowUserPointer(windowHandle)
+	data.eventCallback(WindowCloseEvent())
+
+def window_resize_callback(windowHandle, width, height):
+	data = glfwGetWindowUserPointer(windowHandle)
+	data.width = width
+	data.height = height
+	data.eventCallback(WindowResizeEvent(width, height))
+
+def window_key_callback(windowHandle, key, scancode, action, mods):
+	data = glfwGetWindowUserPointer(windowHandle)
+
+	if action == GLFW_PRESS:
+		data.eventCallback(KeyPressedEvent(key))
+	elif action == GLFW_RELEASE:
+		data.eventCallback(KeyReleasedEvent(key))
+
+def window_mouse_button_callback(windowHandle, button, action, mods):
+	data = glfwGetWindowUserPointer(windowHandle)
+
+	if action == GLFW_PRESS:
+		data.eventCallback(MouseButtonPressedEvent(button))
+	elif action == GLFW_RELEASE:
+		data.eventCallback(MouseButtonReleasedEvent(button))
+
+def window_mouse_moved_callback(windowHandle, x, y):
+	data = glfwGetWindowUserPointer(windowHandle)
+	data.eventCallback(MouseMovedEvent(x, y))
+
+class WindowData():
+	def __init__(self, width, height, name, eventCallback):
+		self.width = width
+		self.height = height
+		self.name = name
+		self.windowHandle = None
+		self.eventCallback = eventCallback
+
 class Window():
-    def __init__(self, width, height, name):
-        self.width = width
-        self.height = height
-        self.name = name
+	def __init__(self, windowData):
+		if not glfwInit():
+			sys.exit("Couldn't initialize GLFW properly.")
 
-        if not glfwInit():
-            sys.exit("Couldn't initialize GLFW properly.")
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5)
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5)
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
+		windowData.windowHandle = glfwCreateWindow(windowData.width,
+													windowData.height,
+													windowData.name,
+													None, None)
+		if not windowData.windowHandle:
+			glfwTerminate()
+			sys.exit("Couldn't create window.")
 
-        self.window_handle = glfwCreateWindow(width, height, name, None, None)
-        if not self.window_handle:
-            glfwTerminate()
-            sys.exit("Couldn't create window.")
+		glfwMakeContextCurrent(windowData.windowHandle)
+		glfwSwapInterval(1)
 
-        glfwMakeContextCurrent(self.window_handle)
-        glfwSwapInterval(1)
+		glfwSetWindowUserPointer(windowData.windowHandle, windowData)
 
-    def cleanup(self):
-        glfwDestroyWindow(self.window_handle)
-        glfwTerminate()
+		glfwSetWindowCloseCallback(windowData.windowHandle, window_close_callback)
+		glfwSetWindowSizeCallback(windowData.windowHandle, window_resize_callback)
 
-    def update(self):
-        glfwPollEvents()
-        glfwSwapBuffers(self.window_handle)
+		glfwSetKeyCallback(windowData.windowHandle, window_key_callback)
 
-    def is_running(self):
-        return not glfwWindowShouldClose(self.window_handle)
-        
-    def process_input(self):
-        if glfwGetKey(self.window_handle, GLFW_KEY_ESCAPE) == GLFW_PRESS:
-            glfwSetWindowShouldClose(self.window_handle, True)
+		glfwSetMouseButtonCallback(windowData.windowHandle, window_mouse_button_callback)
+		glfwSetCursorPosCallback(windowData.windowHandle, window_mouse_moved_callback)
 
-    def get_time(self):
-        return glfwGetTime()
+		self.windowData = windowData
+
+	def cleanup(self):
+		glfwDestroyWindow(self.windowData.windowHandle)
+		glfwTerminate()
+
+	def update(self):
+		glfwPollEvents()
+		glfwSwapBuffers(self.windowData.windowHandle)
+
+	def get_time(self):
+		return glfwGetTime()

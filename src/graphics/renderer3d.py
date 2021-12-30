@@ -1,5 +1,5 @@
 from graphics.vertex_array import VertexArray
-from graphics.vertex_buffer import VertexBuffer, ElementBuffer, BufferLayout, Types
+from graphics.vertex_buffer import VertexBuffer, BufferLayout, Types
 from graphics.shader import Shader
 from OpenGL.GL import *
 from glm import value_ptr, perspective, translate, rotate, radians, scale, mat4, vec3
@@ -75,6 +75,8 @@ class Renderer3D():
     def init(width, height, clearColor):
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
         glViewport(0, 0, width, height)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glEnable(GL_DEPTH_TEST)
 
         global rendererData
@@ -83,6 +85,16 @@ class Renderer3D():
     @staticmethod
     def cleanup():
         rendererData.cleanup()
+
+    @staticmethod
+    def set_viewport(width, height):
+        glViewport(0, 0, width, height)
+
+    @staticmethod
+    def set_aspect_ratio(width, height):
+        rendererData.projectionMatrix = perspective(radians(45.0), width / height, 0.1, 100.0)
+        rendererData.shaderTexture.bind()
+        rendererData.shaderTexture.set_mat4('projection', value_ptr(rendererData.projectionMatrix))
         
     @staticmethod
     def clear():
