@@ -47,6 +47,8 @@ class Renderer2D():
     @staticmethod
     def init(width, height, clearColor):
         glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glViewport(0, 0, width, height)
 
         global rendererData 
