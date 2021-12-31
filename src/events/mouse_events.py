@@ -12,10 +12,17 @@ class MouseMovedEvent(Event):
 		self.x = x
 		self.y = y
 
+class MouseScrollEvent(Event):
+	def __init__(self, x, y):
+		super().__init__()
+		self.x = x
+		self.y = y
+
 class MouseButtonEvent(Event):
 	def __init__(self, button):
 		super().__init__()
 		self.button = button
+
 
 class MouseButtonPressedEvent(MouseButtonEvent):
 	def __init__(self, button):
