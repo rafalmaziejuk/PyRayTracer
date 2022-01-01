@@ -5,15 +5,14 @@ from OpenGL.GL import *
 from glm import value_ptr, perspective, translate, rotate, radians, scale, mat4, vec3
 
 class RendererData():
-    def __init__(self, width, height):
-        self.projectionMatrix = perspective(radians(45.0), width / height, 0.1, 100.0)
-        self.viewMatrix = translate(mat4(1.0), vec3(0.0, 0.0, -3.0))
-
+    def __init__(self, width, height, camera):
+        self.camera = camera
+        self.width = width
+        self.height = height
         self.shaderTexture = Shader('shaders/shaderTexture3D.vert', 'shaders/shaderTexture3D.frag')
         self.shaderTexture.bind()
-        self.shaderTexture.set_mat4('projection', value_ptr(self.projectionMatrix))
-        self.shaderTexture.set_mat4('view', value_ptr(self.viewMatrix))
         self.shaderTexture.set_int('texture0', 0)
+        self.shaderTexture.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
 		
         vertices = [
             -0.5, -0.5, -0.5,  0.0, 0.0,
@@ -72,41 +71,42 @@ rendererData = None
 
 class Renderer3D():
     @staticmethod
-    def init(width, height, clearColor):
-        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
-        glViewport(0, 0, width, height)
+    def init(width, height, clearColor, camera):
         glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glEnable(GL_DEPTH_TEST)
+        glViewport(0, 0, width, height)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
 
         global rendererData
-        rendererData = RendererData(width, height)
+        rendererData = RendererData(width, height, camera)
     
     @staticmethod
     def cleanup():
         rendererData.cleanup()
-
-    @staticmethod
-    def set_viewport(width, height):
-        glViewport(0, 0, width, height)
-
-    @staticmethod
-    def set_aspect_ratio(width, height):
-        rendererData.projectionMatrix = perspective(radians(45.0), width / height, 0.1, 100.0)
-        rendererData.shaderTexture.bind()
-        rendererData.shaderTexture.set_mat4('projection', value_ptr(rendererData.projectionMatrix))
         
     @staticmethod
     def clear():
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
     @staticmethod
-    def drawTexturedCube(position, texture, rotation=45.0):
+    def update_viewport(width, height):
+        glViewport(0, 0, width, height)
+
+    @staticmethod
+    def update_projection_matrix(projectionMatrix):
+        rendererData.shaderTexture.bind()
+        rendererData.shaderTexture.set_mat4('projection', value_ptr(projectionMatrix))
+
+    @staticmethod
+    def draw_textured_cube(texture, position, size, rotation=0.0, rotationVector=(1.0, 1.0, 1.0)):
+        view = rendererData.camera.get_view_matrix()
         model = translate(mat4(1.0), vec3(position)) * \
-		        rotate(mat4(1.0), radians(rotation), vec3(1.0, 1.0, 0.0)) * \
-		        scale(mat4(1.0), vec3(0.5, 0.5, 0.5))
+		        rotate(mat4(1.0), radians(rotation), vec3(rotationVector)) * \
+                scale(mat4(1.0), vec3(size))
         
         rendererData.shaderTexture.bind()
+        rendererData.shaderTexture.set_mat4('view', value_ptr(view))
         rendererData.shaderTexture.set_mat4('model', value_ptr(model))
         
         texture.bind(GL_TEXTURE0)

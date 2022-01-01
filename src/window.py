@@ -1,5 +1,5 @@
 from events.keyboard_events import KeyPressedEvent, KeyReleasedEvent
-from events.mouse_events import MouseMovedEvent, MouseButtonPressedEvent, MouseButtonReleasedEvent
+from events.mouse_events import MouseMovedEvent, MouseButtonPressedEvent, MouseButtonReleasedEvent, MouseScrollEvent
 from events.window_events import WindowCloseEvent, WindowResizeEvent
 from glfw.GLFW import *
 import sys
@@ -30,17 +30,21 @@ def window_mouse_button_callback(windowHandle, button, action, mods):
 	elif action == GLFW_RELEASE:
 		data.eventCallback(MouseButtonReleasedEvent(button))
 
+def window_mouse_scroll_callback(windowHandle, x, y):
+	data = glfwGetWindowUserPointer(windowHandle)
+	data.eventCallback(MouseScrollEvent(x, y))
+
 def window_mouse_moved_callback(windowHandle, x, y):
 	data = glfwGetWindowUserPointer(windowHandle)
 	data.eventCallback(MouseMovedEvent(x, y))
 
 class WindowData():
-	def __init__(self, width, height, name, eventCallback):
+	def __init__(self, width, height, name):
 		self.width = width
 		self.height = height
 		self.name = name
 		self.windowHandle = None
-		self.eventCallback = eventCallback
+		self.eventCallback = None
 
 class Window():
 	def __init__(self, windowData):
@@ -71,6 +75,8 @@ class Window():
 
 		glfwSetMouseButtonCallback(windowData.windowHandle, window_mouse_button_callback)
 		glfwSetCursorPosCallback(windowData.windowHandle, window_mouse_moved_callback)
+		glfwSetScrollCallback(windowData.windowHandle, window_mouse_scroll_callback)
+		glfwSetInputMode(windowData.windowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
 
 		self.windowData = windowData
 
@@ -78,9 +84,14 @@ class Window():
 		glfwDestroyWindow(self.windowData.windowHandle)
 		glfwTerminate()
 
+	def set_event_callback(self, eventCallback):
+		self.windowData.eventCallback = eventCallback
+
 	def update(self):
 		glfwPollEvents()
 		glfwSwapBuffers(self.windowData.windowHandle)
 
 	def get_time(self):
 		return glfwGetTime()
+
+window = Window(WindowData(1280, 720, 'PyRayTracer'))

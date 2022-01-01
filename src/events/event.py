@@ -7,12 +7,12 @@ class Event():
 
 class EventDispatcher():
 	def __init__(self, event):
-		self.eventType = re.search("event.(.*?)'", str(type(event))).group(1)
+		self.eventType = re.search("events.(.*?)'", str(type(event))).group(1)
 		self.event = event
 
 	def dispatch(self, callback):
 		argsFormat = formatargspec(*getfullargspec(callback))
-		callbackEventType = re.search("event.(.*?)\)", argsFormat).group(1)
+		callbackEventType = re.search("events.(.*?)\)", argsFormat).group(1)
 		
 		if self.eventType == callbackEventType:
 			self.event.isHandled |= callback(self.event)
