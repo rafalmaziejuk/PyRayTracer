@@ -16,6 +16,9 @@ class VertexArray():
 	def bind(self):
 		glBindVertexArray(self.id)
 
+	def unbind(self):
+		glBindVertexArray(0)
+
 	def set_vertex_buffer(self, vertexBuffer):
 		self.bind()
 		vertexBuffer.bind()

@@ -8,6 +8,7 @@ class KeyCode(IntEnum):
 	S = 83,
 	W = 87,
 	ESC = 256,
+	LEFT_SHIFT = 340,
 	LEFT_CONTROL = 341
 
 class KeyEvent(Event):
