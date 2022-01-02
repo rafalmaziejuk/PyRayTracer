@@ -1,71 +1,31 @@
-from graphics.vertex_array import VertexArray
-from graphics.vertex_buffer import VertexBuffer, BufferLayout, Types
 from graphics.shader import Shader
 from OpenGL.GL import *
-from glm import value_ptr, perspective, translate, rotate, radians, scale, mat4, vec3
+from glm import value_ptr, vec3
+from enum import IntEnum
+
+class RenderingMode(IntEnum):
+    LINES = GL_LINES,
+    TRIANGLES = GL_TRIANGLES
 
 class RendererData():
     def __init__(self, width, height, camera):
         self.camera = camera
         self.width = width
         self.height = height
-        self.shaderTexture = Shader('shaders/shaderTexture3D.vert', 'shaders/shaderTexture3D.frag')
+        
+        self.shaderTexture = Shader('shaders/texture.vert', 'shaders/texture.frag')
         self.shaderTexture.bind()
         self.shaderTexture.set_int('texture0', 0)
         self.shaderTexture.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
-		
-        vertices = [
-            -0.5, -0.5, -0.5,  0.0, 0.0,
-             0.5, -0.5, -0.5,  1.0, 0.0,
-             0.5,  0.5, -0.5,  1.0, 1.0,
-             0.5,  0.5, -0.5,  1.0, 1.0,
-            -0.5,  0.5, -0.5,  0.0, 1.0,
-            -0.5, -0.5, -0.5,  0.0, 0.0,
-
-            -0.5, -0.5,  0.5,  0.0, 0.0,
-             0.5, -0.5,  0.5,  1.0, 0.0,
-             0.5,  0.5,  0.5,  1.0, 1.0,
-             0.5,  0.5,  0.5,  1.0, 1.0,
-            -0.5,  0.5,  0.5,  0.0, 1.0,
-            -0.5, -0.5,  0.5,  0.0, 0.0,
-
-            -0.5,  0.5,  0.5,  1.0, 0.0,
-            -0.5,  0.5, -0.5,  1.0, 1.0,
-            -0.5, -0.5, -0.5,  0.0, 1.0,
-            -0.5, -0.5, -0.5,  0.0, 1.0,
-            -0.5, -0.5,  0.5,  0.0, 0.0,
-            -0.5,  0.5,  0.5,  1.0, 0.0,
-
-             0.5,  0.5,  0.5,  1.0, 0.0,
-             0.5,  0.5, -0.5,  1.0, 1.0,
-             0.5, -0.5, -0.5,  0.0, 1.0,
-             0.5, -0.5, -0.5,  0.0, 1.0,
-             0.5, -0.5,  0.5,  0.0, 0.0,
-             0.5,  0.5,  0.5,  1.0, 0.0,
-
-            -0.5, -0.5, -0.5,  0.0, 1.0,
-             0.5, -0.5, -0.5,  1.0, 1.0,
-             0.5, -0.5,  0.5,  1.0, 0.0,
-             0.5, -0.5,  0.5,  1.0, 0.0,
-            -0.5, -0.5,  0.5,  0.0, 0.0,
-            -0.5, -0.5, -0.5,  0.0, 1.0,
-
-            -0.5,  0.5, -0.5,  0.0, 1.0,
-             0.5,  0.5, -0.5,  1.0, 1.0,
-             0.5,  0.5,  0.5,  1.0, 0.0,
-             0.5,  0.5,  0.5,  1.0, 0.0,
-            -0.5,  0.5,  0.5,  0.0, 0.0,
-            -0.5,  0.5, -0.5,  0.0, 1.0
-        ]
-        vertexBuffer = VertexBuffer(vertices)
-        vertexBuffer.layout = BufferLayout([Types.FLOAT3, Types.FLOAT2])
         
-        self.vertexArray = VertexArray()
-        self.vertexArray.set_vertex_buffer(vertexBuffer)
+        self.shaderFlatColor = Shader('shaders/flat_color.vert', 'shaders/flat_color.frag')
+        self.shaderFlatColor.bind()
+        self.shaderFlatColor.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
+
 
     def cleanup(self):
         self.shaderTexture.cleanup()
-        self.vertexArray.cleanup()
+        self.shaderFlatColor.cleanup()
 
 rendererData = None
 
@@ -74,9 +34,10 @@ class Renderer3D():
     def init(width, height, clearColor, camera):
         glEnable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
+        glEnable(GL_LINE_SMOOTH)
         glViewport(0, 0, width, height)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3])
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0)
 
         global rendererData
         rendererData = RendererData(width, height, camera)
@@ -98,19 +59,26 @@ class Renderer3D():
         rendererData.shaderTexture.bind()
         rendererData.shaderTexture.set_mat4('projection', value_ptr(projectionMatrix))
 
+        rendererData.shaderFlatColor.bind()
+        rendererData.shaderFlatColor.set_mat4('projection', value_ptr(projectionMatrix))
+
     @staticmethod
-    def draw_textured_cube(texture, position, size, rotation=0.0, rotationVector=(1.0, 1.0, 1.0)):
-        view = rendererData.camera.get_view_matrix()
-        model = translate(mat4(1.0), vec3(position)) * \
-		        rotate(mat4(1.0), radians(rotation), vec3(rotationVector)) * \
-                scale(mat4(1.0), vec3(size))
+    def draw_colored(mesh, mode=RenderingMode.TRIANGLES):
+        rendererData.shaderFlatColor.bind()
+        rendererData.shaderFlatColor.set_vec3f('uColor', vec3(mesh.color))
+        rendererData.shaderFlatColor.set_mat4('model', value_ptr(mesh.modelMatrix))
+        rendererData.shaderFlatColor.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
         
+        mesh.bind()
+        glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
+        mesh.unbind()
+
+    @staticmethod
+    def draw_textured(mesh, mode=RenderingMode.TRIANGLES):
         rendererData.shaderTexture.bind()
-        rendererData.shaderTexture.set_mat4('view', value_ptr(view))
-        rendererData.shaderTexture.set_mat4('model', value_ptr(model))
+        rendererData.shaderTexture.set_mat4('model', value_ptr(mesh.modelMatrix))
+        rendererData.shaderTexture.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
         
-        texture.bind(GL_TEXTURE0)
-        
-        rendererData.vertexArray.bind()
-        glDrawArrays(GL_TRIANGLES, 0, 36)
-        texture.unbind()
+        mesh.bind(GL_TEXTURE0)
+        glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
+        mesh.unbind()

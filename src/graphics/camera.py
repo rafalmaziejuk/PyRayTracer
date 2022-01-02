@@ -2,7 +2,7 @@ from window import window
 from graphics.renderer3d import Renderer3D
 from events.event import EventDispatcher
 from events.window_events import WindowResizeEvent
-from events.mouse_events import MouseMovedEvent, MouseScrollEvent
+from events.mouse_events import MouseMovedEvent
 from events.keyboard_events import KeyCode
 from polled_input import Input
 from glm import *
@@ -75,6 +75,11 @@ class Camera():
 
         if Input.is_key_pressed(window.windowData.windowHandle, KeyCode.LEFT_CONTROL):
             self.position.y -= velocity
+
+        if Input.is_key_pressed(window.windowData.windowHandle, KeyCode.LEFT_SHIFT):
+            self.movementSpeed = 10.0
+        else:
+            self.movementSpeed = 2.5
         
     def on_window_resize(self, windowResizeEvent : WindowResizeEvent):
         if windowResizeEvent.x == 0 or windowResizeEvent.y == 0:
