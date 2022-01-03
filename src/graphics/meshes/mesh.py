@@ -1,12 +1,13 @@
 from graphics.vertex_array import VertexArray
-from graphics.vertex_buffer import ElementBuffer, VertexBuffer, BufferLayout, Types
+from graphics.vertex_buffer import ElementBuffer, VertexBuffer, BufferLayout
 from graphics.texture import Texture
+from glm import vec3
 
 class Mesh():
     def __init__(self, position, vertices, indices, layout):
-        self.position = position
+        self.position = vec3(position)
         self.modelMatrix = None
-        self.color = None
+        self.colour = None
         self.texture = None
 
         vertexBuffer = VertexBuffer(vertices)
@@ -26,8 +27,8 @@ class Mesh():
     def set_texture(self, filename):
         self.texture = Texture(filename)
 
-    def set_color(self, color):
-        self.color = color
+    def set_color(self, colour):
+        self.colour = vec3(colour)
 
     def bind(self, slot=0):
         self.vertexArray.bind()
