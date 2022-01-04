@@ -13,19 +13,23 @@ class RendererData():
         self.width = width
         self.height = height
         
-        self.shaderTexture = Shader('shaders/texture.vert', 'shaders/texture.frag')
-        self.shaderTexture.bind()
-        self.shaderTexture.set_int('texture0', 0)
-        self.shaderTexture.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
-        
         self.shaderFlatColor = Shader('shaders/flat_color.vert', 'shaders/flat_color.frag')
         self.shaderFlatColor.bind()
         self.shaderFlatColor.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
 
+        self.shaderLight = Shader('shaders/light.vert', 'shaders/light.frag')
+        self.shaderLight.bind()
+        self.shaderLight.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
+        
+        self.shaderTexture = Shader('shaders/texture.vert', 'shaders/texture.frag')
+        self.shaderTexture.bind()
+        self.shaderTexture.set_int('texture0', 0)
+        self.shaderTexture.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
 
     def cleanup(self):
-        self.shaderTexture.cleanup()
         self.shaderFlatColor.cleanup()
+        self.shaderLight.cleanup()
+        self.shaderTexture.cleanup()
 
 rendererData = None
 
@@ -34,7 +38,6 @@ class Renderer3D():
     def init(width, height, clearColor, camera):
         glEnable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_LINE_SMOOTH)
         glViewport(0, 0, width, height)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0)
@@ -65,9 +68,22 @@ class Renderer3D():
     @staticmethod
     def draw_colored(mesh, mode=RenderingMode.TRIANGLES):
         rendererData.shaderFlatColor.bind()
-        rendererData.shaderFlatColor.set_vec3f('uColor', vec3(mesh.color))
+        rendererData.shaderFlatColor.set_vec3f('uMeshColour', mesh.colour)
         rendererData.shaderFlatColor.set_mat4('model', value_ptr(mesh.modelMatrix))
         rendererData.shaderFlatColor.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
+        
+        mesh.bind()
+        glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
+        mesh.unbind()
+
+    @staticmethod
+    def draw_illuminated(mesh, lightSource, mode=RenderingMode.TRIANGLES):
+        rendererData.shaderLight.bind()
+        rendererData.shaderLight.set_vec3f('uMeshColour', mesh.colour)
+        rendererData.shaderLight.set_vec3f('uCameraPosition', rendererData.camera.position)
+        rendererData.shaderLight.set_mat4('model', value_ptr(mesh.modelMatrix))
+        rendererData.shaderLight.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
+        lightSource.set_light_uniform(rendererData.shaderLight)
         
         mesh.bind()
         glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)

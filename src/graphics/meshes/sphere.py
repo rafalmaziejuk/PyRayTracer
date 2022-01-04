@@ -22,11 +22,14 @@ class Sphere(Mesh):
                 vertices.append(vector.y)
                 vertices.append(vector.z)
 
+                vertices.append(j / sectors)
+                vertices.append(i / stacks)
+                
                 normalizedVector = normalize(vector)
                 vertices.append(normalizedVector.x)
                 vertices.append(normalizedVector.y)
                 vertices.append(normalizedVector.z)
-        
+                
         for i in range(sectors * stacks + sectors):
             indices.append(i)
             indices.append(i + sectors + 1)
@@ -40,5 +43,5 @@ class Sphere(Mesh):
         self.sectors = sectors
         self.stacks = stacks
             
-        super().__init__(position, vertices, indices, [Types.FLOAT3, Types.FLOAT3])
+        super().__init__(position, vertices, indices, [Types.FLOAT3, Types.FLOAT2, Types.FLOAT3])
         self.modelMatrix = translate(mat4(1.0), vec3(self.position))

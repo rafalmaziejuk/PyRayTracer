@@ -1,10 +1,10 @@
 #version 450 core
 
-out vec4 outColor;
+out vec4 outColour;
 
-uniform vec3 uColor;
+uniform vec3 uMeshColour;
 
 void main()
 {
-    outColor = vec4(uColor, 1.0);
+    outColour = vec4(uMeshColour, 1.0);
 }
