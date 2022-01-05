@@ -1,6 +1,6 @@
 from graphics.shader import Shader
+from graphics.shader_library import ShaderLibrary
 from OpenGL.GL import *
-from glm import value_ptr, vec3
 from enum import IntEnum
 
 class RenderingMode(IntEnum):
@@ -12,24 +12,18 @@ class RendererData():
         self.camera = camera
         self.width = width
         self.height = height
-        
-        self.shaderFlatColor = Shader('shaders/flat_color.vert', 'shaders/flat_color.frag')
-        self.shaderFlatColor.bind()
-        self.shaderFlatColor.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
 
-        self.shaderLight = Shader('shaders/light.vert', 'shaders/light.frag')
-        self.shaderLight.bind()
-        self.shaderLight.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
+        self.shaderLibrary = ShaderLibrary()
+
+        self.shaderLibrary['flat_color'].set_mat4('projection', camera.get_projection_matrix())
+
+        self.shaderLibrary['light'].set_mat4('projection', camera.get_projection_matrix())
         
-        self.shaderTexture = Shader('shaders/texture.vert', 'shaders/texture.frag')
-        self.shaderTexture.bind()
-        self.shaderTexture.set_int('texture0', 0)
-        self.shaderTexture.set_mat4('projection', value_ptr(camera.get_projection_matrix()))
+        self.shaderLibrary['texture'].set_int('texture0', 0)
+        self.shaderLibrary['texture'].set_mat4('projection', camera.get_projection_matrix())
 
     def cleanup(self):
-        self.shaderFlatColor.cleanup()
-        self.shaderLight.cleanup()
-        self.shaderTexture.cleanup()
+        self.shaderLibrary.cleanup()
 
 rendererData = None
 
@@ -59,18 +53,15 @@ class Renderer3D():
 
     @staticmethod
     def update_projection_matrix(projectionMatrix):
-        rendererData.shaderTexture.bind()
-        rendererData.shaderTexture.set_mat4('projection', value_ptr(projectionMatrix))
-
-        rendererData.shaderFlatColor.bind()
-        rendererData.shaderFlatColor.set_mat4('projection', value_ptr(projectionMatrix))
+        for shader in rendererData.shaderLibrary.values():
+            shader.set_mat4('projection', projectionMatrix)
 
     @staticmethod
     def draw_colored(mesh, mode=RenderingMode.TRIANGLES):
-        rendererData.shaderFlatColor.bind()
-        rendererData.shaderFlatColor.set_vec3f('uMeshColour', mesh.colour)
-        rendererData.shaderFlatColor.set_mat4('model', value_ptr(mesh.modelMatrix))
-        rendererData.shaderFlatColor.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
+        shader = rendererData.shaderLibrary['flat_color']
+        shader.set_vec3f('uMeshColour', mesh.colour)
+        shader.set_mat4('model', mesh.modelMatrix)
+        shader.set_mat4('view', rendererData.camera.get_view_matrix())
         
         mesh.bind()
         glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
@@ -78,12 +69,12 @@ class Renderer3D():
 
     @staticmethod
     def draw_illuminated(mesh, lightSource, mode=RenderingMode.TRIANGLES):
-        rendererData.shaderLight.bind()
-        rendererData.shaderLight.set_vec3f('uMeshColour', mesh.colour)
-        rendererData.shaderLight.set_vec3f('uCameraPosition', rendererData.camera.position)
-        rendererData.shaderLight.set_mat4('model', value_ptr(mesh.modelMatrix))
-        rendererData.shaderLight.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
-        lightSource.set_light_uniform(rendererData.shaderLight)
+        shader = rendererData.shaderLibrary['light']
+        shader.set_vec3f('uMeshColour', mesh.colour)
+        shader.set_vec3f('uCameraPosition', rendererData.camera.position)
+        shader.set_mat4('model', mesh.modelMatrix)
+        shader.set_mat4('view', rendererData.camera.get_view_matrix())
+        lightSource.set_light_uniform(shader)
         
         mesh.bind()
         glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
@@ -91,9 +82,9 @@ class Renderer3D():
 
     @staticmethod
     def draw_textured(mesh, mode=RenderingMode.TRIANGLES):
-        rendererData.shaderTexture.bind()
-        rendererData.shaderTexture.set_mat4('model', value_ptr(mesh.modelMatrix))
-        rendererData.shaderTexture.set_mat4('view', value_ptr(rendererData.camera.get_view_matrix()))
+        shader = rendererData.shaderLibrary['texture']
+        shader.set_mat4('model', mesh.modelMatrix)
+        shader.set_mat4('view', rendererData.camera.get_view_matrix())
         
         mesh.bind(GL_TEXTURE0)
         glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
