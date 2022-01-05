@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+from glm import value_ptr
 
 def read_file(filepath):
 	with open(filepath, 'r') as sourceFile:
@@ -7,13 +8,24 @@ def read_file(filepath):
 	return source
 
 class Shader():
-	def __init__(self, vert, frag):
+	def __init__(self, filename):
 		self.id = glCreateProgram()
-
-		shaderSources = {
-			GL_VERTEX_SHADER:   read_file(vert),
-			GL_FRAGMENT_SHADER: read_file(frag)
-			}
+		source = read_file(filename)
+		shaderSources = {}
+		
+		try:
+			foundComp = source.index('#type compute\n')
+			shaderSources[GL_COMPUTE_SHADER] = source[1:]
+		except ValueError as VE:
+			try:
+				foundVert = source.index('#type vertex\n')
+				foundFrag = source.index('#type fragment\n')
+			
+				shaderSources[GL_VERTEX_SHADER] = source[foundVert + 1:foundFrag - 1]
+				shaderSources[GL_FRAGMENT_SHADER] = source[foundFrag + 1:]
+			except ValueError as VE:
+				print(f"{filename} is not a valid shader file.")
+				return
 
 		self.__compile(shaderSources)
 
@@ -51,6 +63,6 @@ class Shader():
 		location = glGetUniformLocation(self.id, name)
 		glUniform3f(location, vec.x, vec.y, vec.z)
 	
-	def set_mat4 (self, name, matrix):
+	def set_mat4(self, name, matrix):
 		location = glGetUniformLocation(self.id, name)
-		glUniformMatrix4fv(location, 1, GL_FALSE, matrix)
+		glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr(matrix))
