@@ -1,4 +1,3 @@
-from graphics.shader import Shader
 from graphics.shader_library import ShaderLibrary
 from OpenGL.GL import *
 from enum import IntEnum

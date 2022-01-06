@@ -2,14 +2,12 @@ from window import window
 from events.event import EventDispatcher
 from events.keyboard_events import KeyPressedEvent, KeyCode
 from events.window_events import WindowCloseEvent
-from graphics.renderer3d import Renderer3D, RenderingMode
+
+from graphics.renderer3d import Renderer3D
 from graphics.meshes.cube import Cube
 from graphics.meshes.sphere import Sphere
-from graphics.meshes.grid import Grid
 from graphics.light import Light
 from graphics.camera import Camera
-
-global window
 
 class Application():
     def __init__(self):

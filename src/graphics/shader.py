@@ -1,5 +1,6 @@
 from OpenGL.GL import *
 from glm import value_ptr
+from sys import exit
 
 def read_file(filepath):
 	with open(filepath, 'r') as sourceFile:
@@ -38,8 +39,15 @@ class Shader():
 			shader = glCreateShader(shaderType)
 			glShaderSource(shader, shaderSource)
 			glCompileShader(shader)
-			glAttachShader(self.id, shader)
+			
+			retVal = GLuint()
+			glGetShaderiv(shader, GL_COMPILE_STATUS, retVal)
+			if not retVal:
+				log = glGetShaderInfoLog(shader).decode('utf-8')
+				glDeleteShader(shader)
+				exit("Couldn't compile shader properly.\n" + log)
 
+			glAttachShader(self.id, shader)
 			shaders.append(shader)
 		
 		glLinkProgram(self.id)
