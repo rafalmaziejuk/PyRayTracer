@@ -55,6 +55,13 @@ class Shader():
 		for shader in shaders:
 			glDetachShader(self.id, shader)
 			glDeleteShader(shader)
+		
+		retVal = GLuint()
+		glGetProgramiv(self.id, GL_LINK_STATUS, retVal)
+		if not retVal:
+			log = glGetProgramInfoLog(self.id).decode('utf-8')
+			glDeleteProgram(self.id)
+			exit("Couldn't link shader program.\n" + log)
 
 	def bind(self):
 		glUseProgram(self.id)
@@ -62,7 +69,7 @@ class Shader():
 	def set_int(self, name, value):
 		location = glGetUniformLocation(self.id, name)
 		glUniform1i(location, value)
-	
+
 	def set_float(self, name, value):
 		location = glGetUniformLocation(self.id, name)
 		glUniform1f(location, value)
