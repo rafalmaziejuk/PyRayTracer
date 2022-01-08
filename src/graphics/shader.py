@@ -70,6 +70,10 @@ class Shader():
 		location = glGetUniformLocation(self.id, name)
 		glUniform1i(location, value)
 
+	def set_uint(self, name, value):
+		location = glGetUniformLocation(self.id, name)
+		glUniform1ui(location, value)
+
 	def set_float(self, name, value):
 		location = glGetUniformLocation(self.id, name)
 		glUniform1f(location, value)
