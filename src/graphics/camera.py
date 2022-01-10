@@ -1,5 +1,5 @@
 from window import window
-from graphics.renderer3d import Renderer3D
+from graphics.renderer import Renderer
 from events.event import EventDispatcher
 from events.window_events import WindowResizeEvent
 from events.mouse_events import MouseMovedEvent
@@ -43,11 +43,10 @@ class Camera():
 
     def update_projection_matrix(self):
         self.projectionMatrix = perspective(radians(self.fov), self.aspectRatio, self.nearClip, self.farClip)
-        Renderer3D.update_projection_matrix(self.projectionMatrix)
 
     def update_viewport(self, width, height):
         self.aspectRatio = width / height
-        Renderer3D.update_viewport(width, height)
+        Renderer.update_viewport(width, height)
         self.update_projection_matrix()
 
     def on_event(self, event):

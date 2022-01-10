@@ -1,4 +1,6 @@
 from graphics.shader_library import ShaderLibrary
+from graphics.fullscreen_quad import FullscreenQuad
+from graphics.raytracer import Raytracer
 from OpenGL.GL import *
 from enum import IntEnum
 
@@ -13,20 +15,24 @@ class RendererData():
         self.height = height
 
         self.shaderLibrary = ShaderLibrary()
-
+        
         self.shaderLibrary['flat_color'].set_mat4('projection', camera.get_projection_matrix())
-
+        
         self.shaderLibrary['light'].set_mat4('projection', camera.get_projection_matrix())
         
         self.shaderLibrary['texture'].set_int('texture0', 0)
         self.shaderLibrary['texture'].set_mat4('projection', camera.get_projection_matrix())
+        
+        self.shaderLibrary['fullscreen_quad'].set_int('texture0', 0)
+        self.raytracer = Raytracer(width, height, camera, self.shaderLibrary['ray_tracing'])
 
     def cleanup(self):
         self.shaderLibrary.cleanup()
+        self.raytracer.cleanup()
 
 rendererData = None
 
-class Renderer3D():
+class Renderer():
     @staticmethod
     def init(width, height, clearColor, camera):
         glEnable(GL_BLEND)
@@ -49,11 +55,7 @@ class Renderer3D():
     @staticmethod
     def update_viewport(width, height):
         glViewport(0, 0, width, height)
-
-    @staticmethod
-    def update_projection_matrix(projectionMatrix):
-        for shader in rendererData.shaderLibrary.values():
-            shader.set_mat4('projection', projectionMatrix)
+        rendererData.raytracer.resize_fullscreen_quad(width, height)
 
     @staticmethod
     def draw_colored(mesh, mode=RenderingMode.TRIANGLES):
@@ -85,6 +87,15 @@ class Renderer3D():
         shader.set_mat4('model', mesh.modelMatrix)
         shader.set_mat4('view', rendererData.camera.get_view_matrix())
         
-        mesh.bind(GL_TEXTURE0)
+        mesh.bind()
         glDrawElements(mode, mesh.vertexArray.elementBuffer.elementCount, GL_UNSIGNED_INT, None)
         mesh.unbind()
+
+    @staticmethod
+    def draw_fullscreen_quad():
+        rendererData.raytracer.raytrace_scene()
+
+        shader = rendererData.shaderLibrary['fullscreen_quad']
+        rendererData.raytracer.fullscreenQuad.bind()
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+        rendererData.raytracer.fullscreenQuad.unbind()

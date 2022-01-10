@@ -1,43 +1,65 @@
 from OpenGL.GL import *
-from os import path
 from PIL import Image
+from os import path
+from ctypes import pointer, c_uint
 
 class Texture():
-	def __init__(self, filename):
-		image = self.__load_image(filename)
+	def __init__(self, width=None, height=None, filename=None):
+		self.id = c_uint()
+		self.width = None
+		self.height = None
+		self.size = None
+		self.internalFormat = None
+		self.dataFormat = None
+
+		if width and height:
+			self.__create_texture(width, height)
+
+		if filename:
+			self.__load_texture(filename)
+
+	def cleanup(self):
+		glDeleteTextures(1, self.id)
+
+	def __create_texture(self, width, height):
+		self.width = width
+		self.height = height
+		self.internalFormat = GL_RGBA8
+		self.dataFormat = GL_RGBA
+
+		glCreateTextures(GL_TEXTURE_2D, 1, pointer(self.id))
+		glBindTexture(GL_TEXTURE_2D, self.id)
+		glTexImage2D(GL_TEXTURE_2D, 0, self.internalFormat, self.width, self.height, 0, self.dataFormat, GL_UNSIGNED_BYTE, None)
+
+		glTextureParameteri(self.id, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+		glTextureParameteri(self.id, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+		glTextureParameteri(self.id, GL_TEXTURE_WRAP_S, GL_REPEAT)
+		glTextureParameteri(self.id, GL_TEXTURE_WRAP_T, GL_REPEAT)
+
+	def __load_texture(self, filename):
+		image = Image.open(path.join('../textures/', filename)).transpose(Image.FLIP_TOP_BOTTOM)
+		bytess = image.tobytes()
 		self.width = image.width
 		self.height = image.height
 		self.size = image.size
 
-		self.id = glGenTextures(1)
-		glBindTexture(GL_TEXTURE_2D, self.id)
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-		internalFormat = 0
-		dataFormat = 0
 		if image.mode == 'RGB':
-			internalFormat = GL_RGB8
-			dataFormat = GL_RGB
+			self.internalFormat = GL_RGB8
+			self.dataFormat = GL_RGB
 		elif image.mode == 'RGBA':
-			internalFormat = GL_RGBA8
-			dataFormat = GL_RGBA
+			self.internalFormat = GL_RGBA8
+			self.dataFormat = GL_RGBA
 
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, self.width, self.height, 0, dataFormat, GL_UNSIGNED_BYTE, image.tobytes())
+		glCreateTextures(GL_TEXTURE_2D, 1, pointer(self.id))
+		glTextureStorage2D(self.id, 1, self.internalFormat, self.width, self.height)
+
+		glTextureParameteri(self.id, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+		glTextureParameteri(self.id, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+		glTextureParameteri(self.id, GL_TEXTURE_WRAP_S, GL_REPEAT)
+		glTextureParameteri(self.id, GL_TEXTURE_WRAP_T, GL_REPEAT)
+
+		glTextureSubImage2D(self.id, 0, 0, 0, self.width, self.height, self.dataFormat, GL_UNSIGNED_BYTE, image.tobytes())
 		glGenerateMipmap(GL_TEXTURE_2D)
 
-	def cleanup(self):
-		glDeleteTextures(1, [self.id])
-
-	def __load_image(self, filename):
-		return Image.open(path.join('../textures/', filename)).transpose(Image.FLIP_TOP_BOTTOM)
-
-	def bind(self, slot):
-		glActiveTexture(slot)
-		glBindTexture(GL_TEXTURE_2D, self.id)
-
-	def unbind(self):
-		glBindTexture(GL_TEXTURE_2D, 0)
+	def bind(self, slot=0):
+		glBindTextureUnit(slot, self.id)

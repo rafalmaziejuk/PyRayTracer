@@ -3,6 +3,8 @@ from enum import IntEnum
 
 class KeyCode(IntEnum):
 	SPACE = 32,
+	KEY_1 = 48,
+	KEY_2 = 49,
 	A = 65,
 	D = 68,
 	S = 83,
