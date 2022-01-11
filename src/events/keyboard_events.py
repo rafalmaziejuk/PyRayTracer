@@ -3,13 +3,13 @@ from enum import IntEnum
 
 class KeyCode(IntEnum):
 	SPACE = 32,
-	KEY_1 = 48,
-	KEY_2 = 49,
 	A = 65,
 	D = 68,
 	S = 83,
 	W = 87,
 	ESC = 256,
+	RIGHT = 262,
+	LEFT = 263,
 	LEFT_SHIFT = 340,
 	LEFT_CONTROL = 341
 

@@ -2,11 +2,8 @@ from window import window
 from events.event import EventDispatcher
 from events.keyboard_events import KeyPressedEvent, KeyCode
 from events.window_events import WindowCloseEvent
-
 from graphics.renderer import Renderer
 from graphics.camera import Camera
-from graphics.raytracer import Raytracer
-from graphics.shader import Shader
 
 class Application():
     def __init__(self):
@@ -16,7 +13,8 @@ class Application():
         Renderer.init(window.windowData.width, 
                         window.windowData.height, 
                         (0.0, 0.0, 0.0),
-                        self.camera)
+                        self.camera,
+                        'example_scene')
 
     def on_event(self, event):
         dispatcher = EventDispatcher(event)
@@ -53,5 +51,10 @@ class Application():
         if keyPressedEvent.keyCode == KeyCode.ESC:
             self.isRunning = False
             return True
+
+        if keyPressedEvent.keyCode == KeyCode.RIGHT:
+            Renderer.update_reflection_depth(1)
+        elif keyPressedEvent.keyCode == KeyCode.LEFT:
+            Renderer.update_reflection_depth(-1)
 
         return False
