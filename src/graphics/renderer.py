@@ -9,7 +9,7 @@ class RenderingMode(IntEnum):
     TRIANGLES = GL_TRIANGLES
 
 class RendererData():
-    def __init__(self, width, height, camera):
+    def __init__(self, width, height, camera, sceneName):
         self.camera = camera
         self.width = width
         self.height = height
@@ -24,7 +24,7 @@ class RendererData():
         self.shaderLibrary['texture'].set_mat4('projection', camera.get_projection_matrix())
         
         self.shaderLibrary['fullscreen_quad'].set_int('texture0', 0)
-        self.raytracer = Raytracer(width, height, camera, self.shaderLibrary['ray_tracing'])
+        self.raytracer = Raytracer(width, height, camera, self.shaderLibrary['ray_tracing'], sceneName)
 
     def cleanup(self):
         self.shaderLibrary.cleanup()
@@ -34,7 +34,7 @@ rendererData = None
 
 class Renderer():
     @staticmethod
-    def init(width, height, clearColor, camera):
+    def init(width, height, clearColor, camera, sceneName):
         glEnable(GL_BLEND)
         glEnable(GL_DEPTH_TEST)
         glViewport(0, 0, width, height)
@@ -42,7 +42,7 @@ class Renderer():
         glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.0)
 
         global rendererData
-        rendererData = RendererData(width, height, camera)
+        rendererData = RendererData(width, height, camera, sceneName)
     
     @staticmethod
     def cleanup():
@@ -56,6 +56,10 @@ class Renderer():
     def update_viewport(width, height):
         glViewport(0, 0, width, height)
         rendererData.raytracer.resize_fullscreen_quad(width, height)
+
+    @staticmethod
+    def update_reflection_depth(value):
+        rendererData.raytracer.update_reflection_depth(value)
 
     @staticmethod
     def draw_colored(mesh, mode=RenderingMode.TRIANGLES):
