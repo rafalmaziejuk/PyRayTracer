@@ -1,8 +1,16 @@
 from graphics.shader_library import ShaderLibrary
 from graphics.fullscreen_quad import FullscreenQuad
 from graphics.raytracer import Raytracer
-from OpenGL.GL import *
 from enum import IntEnum
+from OpenGL.GL import (
+     GL_LINES, GL_TRIANGLES, GL_TRIANGLE_STRIP,
+     GL_BLEND, GL_DEPTH_TEST, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+     GL_COLOR_BUFFER_BIT, GL_DEPTH_BUFFER_BIT,
+     GL_UNSIGNED_INT,
+     glEnable, glViewport, 
+     glBlendFunc, glClearColor, glClear,
+     glDrawElements, glDrawArrays
+)
 
 class RenderingMode(IntEnum):
     LINES = GL_LINES,

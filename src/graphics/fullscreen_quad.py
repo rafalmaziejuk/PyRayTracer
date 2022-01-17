@@ -1,8 +1,10 @@
 from graphics.vertex_buffer import VertexBuffer, BufferLayout, Types
 from graphics.vertex_array import VertexArray
-from graphics.texture import Texture
-
-from OpenGL.GL import *
+from OpenGL.GL import (
+    GL_FALSE,
+    GL_WRITE_ONLY, GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_RGBA8,
+    glBindTexture, glBindImageTexture, glTexImage2D
+)
 
 VERTICES = [
          #position     #texCoords
@@ -40,4 +42,4 @@ class FullscreenQuad():
 
         glBindTexture(GL_TEXTURE_2D, texture.id)
         glTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat, texture.width, texture.height, 0, texture.dataFormat, GL_UNSIGNED_BYTE, None)
-        glBindImageTexture(0, texture.id, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8)
+        glBindImageTexture(0, texture.id, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8)

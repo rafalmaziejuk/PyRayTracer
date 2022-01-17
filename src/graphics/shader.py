@@ -1,6 +1,16 @@
-from OpenGL.GL import *
 from glm import value_ptr
 from sys import exit
+from OpenGL.GL import (
+	GL_COMPUTE_SHADER, GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
+	GL_COMPILE_STATUS, GL_LINK_STATUS,
+	GLuint, GL_FALSE,
+	glCreateProgram, glDeleteProgram, glLinkProgram, glUseProgram,
+	glGetProgramiv, glGetProgramInfoLog,
+	glCreateShader, glDeleteShader, glAttachShader, glDetachShader,
+	glShaderSource, glCompileShader, 
+	glGetShaderiv, glGetShaderInfoLog,
+	glGetUniformLocation, glUniform1i, glUniform1ui, glUniform1f, glUniform3f, glUniformMatrix4fv
+)
 
 def read_file(filepath):
 	with open(filepath, 'r') as sourceFile:

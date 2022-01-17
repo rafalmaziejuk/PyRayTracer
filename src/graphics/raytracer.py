@@ -1,9 +1,19 @@
 from scenes.scene import Scene
 from graphics.fullscreen_quad import FullscreenQuad
 from graphics.texture import Texture
-
-from OpenGL.GL import *
 from glm import tan, acos
+from OpenGL.GL import (
+    GL_FALSE,
+    GL_BUFFER_DATA_SIZE,
+    GL_ALL_BARRIER_BITS,
+    GL_SHADER_STORAGE_BLOCK, GL_SHADER_STORAGE_BUFFER,
+    GL_READ_ONLY, GL_DYNAMIC_DRAW, GL_STATIC_DRAW,
+    GLint, GLubyte,
+    glBindImageTexture, glShaderStorageBlockBinding, 
+    glGenBuffers, glBindBuffer, glBindBufferBase, glBufferData, glDeleteBuffers,
+    glGetProgramResourceIndex, glGetProgramResourceiv,
+    glMemoryBarrier, glDispatchCompute
+)
 
 WORK_GROUP_SIZE = 16
 
@@ -12,7 +22,7 @@ class Raytracer():
         self.fullscreenQuad = FullscreenQuad(Texture(width, height))
         self.computeShader = shader
         self.camera = camera
-        self.reflectionDepth = 3
+        self.reflectionDepth = 1
         self.scene = Scene(sceneName)
 
         self.__initialize_compute_shader(self.computeShader, self.camera, self.fullscreenQuad.renderTexture)
@@ -22,7 +32,7 @@ class Raytracer():
         self.fullscreenQuad.cleanup()
 
     def __initialize_compute_shader(self, shader, camera, texture):
-        glBindImageTexture(0, texture.id, 0, GL_FALSE, 0, GL_READ_WRITE, texture.internalFormat)
+        glBindImageTexture(0, texture.id, 0, GL_FALSE, 0, GL_READ_ONLY, texture.internalFormat)
 
         self.__initialize_compute_shader_uniforms(shader, camera, texture)
         self.__initialize_compute_shader_buffers(shader)

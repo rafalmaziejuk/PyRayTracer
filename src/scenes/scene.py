@@ -1,8 +1,7 @@
-import sqlite3
-from sqlite3 import Error
-from glm import vec2, vec3, vec4
 from enum import IntEnum
 from struct import pack
+from glm import vec2, vec3, vec4
+from sqlite3 import Error, connect
 
 class ObjectTypes(IntEnum):
     SPHERE = 1,
@@ -188,7 +187,7 @@ class Scene():
     def __connect_to_database(self, database):
         connection = None
         try:
-            connection = sqlite3.connect(database)
+            connection = connect(database)
         except Error as e:
             print(e)
 
