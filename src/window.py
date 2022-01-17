@@ -1,8 +1,21 @@
 from events.keyboard_events import KeyPressedEvent, KeyReleasedEvent
 from events.mouse_events import MouseMovedEvent, MouseButtonPressedEvent, MouseButtonReleasedEvent, MouseScrollEvent
 from events.window_events import WindowCloseEvent, WindowResizeEvent
-from glfw.GLFW import *
-import sys
+from sys import exit
+from glfw.GLFW import (
+	GLFW_PRESS, GLFW_RELEASE,
+	GLFW_CONTEXT_VERSION_MAJOR, GLFW_CONTEXT_VERSION_MINOR,
+	GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE,
+	GLFW_CURSOR, GLFW_CURSOR_DISABLED,
+	glfwInit, glfwTerminate, 
+	glfwCreateWindow, glfwDestroyWindow,
+	glfwWindowHint, glfwMakeContextCurrent, glfwSwapInterval, 
+	glfwPollEvents, glfwSwapBuffers, glfwGetTime,
+	glfwSetWindowUserPointer, glfwGetWindowUserPointer,
+	glfwSetWindowCloseCallback, glfwSetWindowSizeCallback,
+	glfwSetKeyCallback, 
+	glfwSetMouseButtonCallback, glfwSetCursorPosCallback, glfwSetScrollCallback, glfwSetInputMode
+)
 
 def window_close_callback(windowHandle):
 	data = glfwGetWindowUserPointer(windowHandle)
@@ -49,7 +62,7 @@ class WindowData():
 class Window():
 	def __init__(self, windowData):
 		if not glfwInit():
-			sys.exit("Couldn't initialize GLFW properly.")
+			exit("Couldn't initialize GLFW properly.")
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5)
@@ -61,7 +74,7 @@ class Window():
 													None, None)
 		if not windowData.windowHandle:
 			glfwTerminate()
-			sys.exit("Couldn't create window.")
+			exit("Couldn't create window.")
 
 		glfwMakeContextCurrent(windowData.windowHandle)
 		glfwSwapInterval(1)

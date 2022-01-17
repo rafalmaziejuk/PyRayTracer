@@ -5,7 +5,12 @@ from events.window_events import WindowResizeEvent
 from events.mouse_events import MouseMovedEvent
 from events.keyboard_events import KeyCode
 from polled_input import Input
-from glm import *
+from glm import (
+    vec2, vec3,
+    cos, sin, radians,
+    normalize, cross,
+    lookAt, perspective
+)
 
 global window
 

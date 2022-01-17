@@ -1,5 +1,8 @@
-from glfw.GLFW import glfwGetKey, glfwGetCursorPos, GLFW_PRESS, GLFW_REPEAT
 from glm import vec2
+from glfw.GLFW import (
+	GLFW_PRESS, GLFW_REPEAT,
+	glfwGetKey, glfwGetCursorPos
+)
 
 class Input():
 	@staticmethod

@@ -1,5 +1,9 @@
-from OpenGL.GL import *
 from ctypes import c_void_p
+from OpenGL.GL import (
+	GL_FLOAT, GL_FALSE,
+	glGenVertexArrays, glBindVertexArray, glDeleteVertexArrays,
+	glEnableVertexAttribArray, glVertexAttribPointer
+)
 
 class VertexArray():
 	def __init__(self):

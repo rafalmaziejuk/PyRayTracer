@@ -1,6 +1,10 @@
-from OpenGL.GL import *
 from enum import IntEnum
 from ctypes import sizeof, c_float, c_uint32
+from OpenGL.GL import (
+	GL_STATIC_DRAW,
+	GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER,
+	glGenBuffers, glDeleteBuffers, glBindBuffer, glBufferData
+)
 
 class Types(IntEnum) :
 	NONE = 0,

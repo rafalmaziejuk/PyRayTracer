@@ -1,7 +1,14 @@
-from OpenGL.GL import *
 from PIL import Image
 from os import path
 from ctypes import pointer, c_uint
+from OpenGL.GL import (
+	GL_TEXTURE_2D, GL_RGB, GL_RGB8, GL_RGBA, GL_RGBA8, GL_UNSIGNED_BYTE,
+	GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER, 
+	GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
+	GL_LINEAR, GL_REPEAT,
+	glCreateTextures, glDeleteTextures, glBindTexture, glBindTextureUnit,
+	glTexImage2D, glTextureSubImage2D, glGenerateMipmap, glTextureParameteri
+)
 
 class Texture():
 	def __init__(self, width=None, height=None, filename=None):
