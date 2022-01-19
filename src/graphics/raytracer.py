@@ -86,7 +86,7 @@ class Raytracer():
         if self.reflectionDepth > 1 and value == -1:
             self.reflectionDepth += value
             changed = True
-        elif self.reflectionDepth < 9 and value == 1:
+        elif self.reflectionDepth < 5 and value == 1:
             self.reflectionDepth += value
             changed = True
 
@@ -103,13 +103,19 @@ class Raytracer():
         self.computeShader.set_vec3f('camera.right', self.camera.right)
 
         glMemoryBarrier(GL_ALL_BARRIER_BITS)
-        glDispatchCompute(int(self.fullscreenQuad.renderTexture.width / 16),
-                          int(self.fullscreenQuad.renderTexture.height / 16), 
+        glDispatchCompute(int(self.fullscreenQuad.renderTexture.width / WORK_GROUP_SIZE),
+                          int(self.fullscreenQuad.renderTexture.height / WORK_GROUP_SIZE), 
                           1)
         glMemoryBarrier(GL_ALL_BARRIER_BITS)
 
     def resize_fullscreen_quad(self, width, height):
         self.computeShader.bind()
+        
+        y = tan(self.camera.fov * acos(-1) / 180.0 / 2.0)
+        x = (width * y) / height
+        self.computeShader.set_float('camera.tanFovX', x)
+        self.computeShader.set_float('camera.tanFovY', y)
+
+        self.fullscreenQuad.resize(width, height)
         self.computeShader.set_uint('width', width)
         self.computeShader.set_uint('height', height)
-        self.fullscreenQuad.resize(width, height)
